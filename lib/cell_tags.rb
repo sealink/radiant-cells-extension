@@ -25,4 +25,31 @@ module CellTags
     end
   end
 
+
+  desc %{
+    Renders an SSI (server side include) instruction for the cell specified
+    in the @name@ attribute _outside_ of  the context of a page.
+
+    When SSI is turned on within a front end apache/nginx server, this will 
+    trigger a call back to the server, where the name_and_value
+    will be decoded and checked.
+
+    Also passes back initial params and page_path.
+    
+    *Usage:*
+
+    <pre><code><r:cell_by_ssi name="cell_name/view_name" data_param_1="x" data_param_2="y"/></code></pre>
+  }
+  tag 'cell_by_ssi' do |tag|
+    page_path = tag.globals.page.request.path
+    params    = tag.globals.page.request.params
+
+    name_and_value = tag.attr['name']
+
+    cell_params_str = "name=#{name_and_value}"
+    cell_params_str += "&page_pathname=#{page_path}"
+    cell_params_str += params.to_query
+
+    raw "<!--# include virtual='/cells?#{cell_params_str}' -->"
+  end
 end
