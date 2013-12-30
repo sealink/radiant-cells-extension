@@ -15,14 +15,7 @@ module CellTags
     <pre><code><r:cell name="cell_name/view_name" data_param_1="x" data_param_2="y"/></code></pre>
   }
   tag "cell" do |tag|
-    name = tag.attr.delete('name')
-    name, view = name.split("/") if name
-    if name && view
-      cell_attrs = tag.attr.merge(:page => tag.locals.page).symbolize_keys
-      tag.locals.page.response.template.controller.render_cell(name, view, cell_attrs)
-    else
-      raise TagError.new("'cell' tag must contain 'name' and 'view' attributes")
-    end
+    render_cell(tag)
   end
 
 
@@ -50,6 +43,21 @@ module CellTags
     cell_params_str += "&page_pathname=#{page_path}"
     cell_params_str += params.to_query
 
-    raw "<!--# include virtual='/cells?#{cell_params_str}' -->"
+    if Rails.env.development?
+      render_cell(tag)
+    else
+      raw "<!--# include virtual='/cells?#{cell_params_str}' -->"
+    end
+  end
+
+  def render_cell(tag)
+    name = tag.attr.delete('name')
+    name, view = name.split("/") if name
+    if name && view
+      cell_attrs = tag.attr.merge(:page => tag.locals.page).symbolize_keys
+      tag.locals.page.response.template.controller.render_cell(name, view, cell_attrs)
+    else
+      raise TagError.new("'cell' tag must contain 'name' and 'view' attributes")
+    end
   end
 end
