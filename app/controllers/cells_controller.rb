@@ -7,6 +7,7 @@ class CellsController < SiteController
   #  :extra_data...
   def show
     name, view = params.delete('name').split('/')
+    set_monitoring_meta_data(name, view)
     if name && view
       cell_attrs = params
 
@@ -24,5 +25,12 @@ class CellsController < SiteController
 
     end
   end
-end
 
+
+  private
+
+  def set_monitoring_meta_data(controller, action)
+    return unless defined?(NewRelic)
+    NewRelic::Agent.set_transaction_name("#{controller}/#{action}")
+  end
+end
