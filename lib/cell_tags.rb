@@ -34,19 +34,13 @@ module CellTags
     <pre><code><r:cell_by_ssi name="cell_name/view_name" data_param_1="x" data_param_2="y"/></code></pre>
   }
   tag 'cell_by_ssi' do |tag|
-    page_path = tag.globals.page.request.path
-    params    = tag.globals.page.request.params
-
-    name_and_value = tag.attr['name']
-
-    cell_params_str = "name=#{name_and_value}"
-    cell_params_str += "&page_pathname=#{page_path}"
-    cell_params_str += params.to_query
+    request     = tag.globals.page.request
+    cell_params = request.params.merge(name: tag.attr['name'], page_pathname: request.path)
 
     if Rails.env.development?
       render_cell(tag)
     else
-      raw "<!--# include virtual='/cells?#{cell_params_str}' -->"
+      raw "<!--# include virtual='/cells?#{cell_params.to_query}' -->"
     end
   end
 
