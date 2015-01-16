@@ -28,7 +28,8 @@ module CellTags
     cell_params = request.params.merge(tag.attr).merge(page_pathname: request.path)
 
     ssi = ENV.key?('SSI') ? ENV['SSI'] == 'on' : !Rails.env.development?
-    if ssi
+    local = tag.attr['local'] == 'true'
+    if ssi && !local
       raw "<!--# include virtual='/cells?#{cell_params.to_query}' -->"
     else
       render_cell(tag)
